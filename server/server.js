@@ -5,11 +5,13 @@ import bodyParser from 'body-parser'
 import sockjs from 'sockjs'
 import { renderToStaticNodeStream } from 'react-dom/server'
 import React from 'react'
+import axios from 'axios'
 
 import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
 
+const { readFile, writeFile, stat } = require("fs").promises; 
 require('colors')
 
 let Root
@@ -35,10 +37,17 @@ const middleware = [
 
 middleware.forEach((it) => server.use(it))
 
-server.use('/api/', (req, res) => {
-  res.status(404)
-  res.end()
-})
+server.get('/api/v1/users', (req, res) => {
+  stat(`${__dirname}/users.json`)  
+    .then(readFile(`${__dirname}/users.json`, { encoding: "utf8" })  
+    .then(text => {  
+      res.json(JSON.parse(text))
+    })   
+    .catch(
+    axios('https://jsonplaceholder.typicode.com/users')
+    .then(({data}) => data)
+    .then(result => writeFile(`${__dirname}/users.json`, JSON.stringify(result) , { encoding: "utf8" }))))
+  })
 
 const [htmlStart, htmlEnd] = Html({
   body: 'separator',
