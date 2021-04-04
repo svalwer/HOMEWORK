@@ -39,8 +39,8 @@ const middleware = [
 middleware.forEach((it) => server.use(it))
 
 server.get('/api/v1/users', (req, res) => {
-  stat(`${__dirname}/users.json`)  
-    .then(readFile(`${__dirname}/users.json`, { encoding: "utf8" })  
+  stat(`${__dirname}/data/users.json`)  
+    .then(readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })  
     .then(text => {  
       res.json(JSON.parse(text))
     })   
@@ -52,7 +52,7 @@ server.get('/api/v1/users', (req, res) => {
 
 server.post('/api/v1/users', async (req, res) => {
     const polzovatel = req.body
-    const result = await readFile(`${__dirname}/users.json`, { encoding: "utf8" })
+    const result = await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })
     .then(text => {
       const rasparsenniyText = JSON.parse(text)
       const posledniIdPlusOdin =  rasparsenniyText[rasparsenniyText.length - 1].id + 1
@@ -65,7 +65,7 @@ server.post('/api/v1/users', async (req, res) => {
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
     const newObj = req.body
-    const result = await readFile(`${__dirname}/users.json`, { encoding: "utf8" })  
+    const result = await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })  
     .then(text => {  
       const textUpdated = JSON.parse(text)
       const { userId } = req.params
@@ -78,7 +78,7 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
 })
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
-  const result = await readFile(`${__dirname}/users.json`, { encoding: "utf8" })  
+  const result = await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })  
   .then(text => {  
     const textUpdated = JSON.parse(text)
     const { userId } = req.params
@@ -92,7 +92,7 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
 })
 
 server.delete('/api/v1/users', (req, res) => {
-  const result = unlink(`${__dirname}/users.json`)
+  const result = unlink(`${__dirname}/data/users.json`)
   res.json(result)
 })
 
