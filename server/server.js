@@ -47,7 +47,7 @@ server.get('/api/v1/users', (req, res) => {
     .catch(
     axios('https://jsonplaceholder.typicode.com/users')
     .then(({data}) => data)
-    .then(result => writeFile(`${__dirname}/users.json`, JSON.stringify(result) , { encoding: "utf8" }))))
+    .then(result => writeFile(`${__dirname}/data/users.json`, JSON.stringify(result) , { encoding: "utf8" }))))
   })
 
 server.post('/api/v1/users', async (req, res) => {
@@ -57,7 +57,7 @@ server.post('/api/v1/users', async (req, res) => {
       const rasparsenniyText = JSON.parse(text)
       const posledniIdPlusOdin =  rasparsenniyText[rasparsenniyText.length - 1].id + 1
       const noviyPolzovatel = [...rasparsenniyText, {id: posledniIdPlusOdin, ...polzovatel}]
-      writeFile(`${__dirname}/users.json`, JSON.stringify(noviyPolzovatel), { encoding: "utf8" })
+      writeFile(`${__dirname}/data/users.json`, JSON.stringify(noviyPolzovatel), { encoding: "utf8" })
       return { status: 'success', id: posledniIdPlusOdin }
     })  
     res.json(result)
@@ -70,8 +70,8 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
       const textUpdated = JSON.parse(text)
       const { userId } = req.params
       const number = +userId
-      const updatedObj = { ...textUpdated[number], ...newObj }
-      writeFile(`${__dirname}/users.json`, JSON.stringify(updatedObj), { encoding: "utf8" })
+      const updatedObj = { ...textUpdated[number - 1], ...newObj }
+      writeFile(`${__dirname}/data/users.json`, JSON.stringify(updatedObj), { encoding: "utf8" })
       return { status: 'success', id: userId } 
     })
     res.json(result)
@@ -83,8 +83,9 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
     const textUpdated = JSON.parse(text)
     const { userId } = req.params
     const number = +userId
-    const deletedElement = [...textUpdated.splice(number, 1)] 
-    writeFile(`${__dirname}/users.json`, JSON.stringify(deletedElement), { encoding: "utf8" })
+    textUpdated.splice(number - 1, 1)
+    const qwe = [...textUpdated]
+    writeFile(`${__dirname}/data/users.json`, JSON.stringify(qwe), { encoding: "utf8" })
     return { status: 'success', id: userId }
   })
   res.json(result)
