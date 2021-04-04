@@ -10,8 +10,9 @@ import axios from 'axios'
 import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
+// import { id } from 'postcss-selector-parser'
 
-const { readFile, writeFile, stat } = require("fs").promises; 
+const { readFile, writeFile, stat, unlink } = require("fs").promises; 
 require('colors')
 
 let Root
@@ -48,6 +49,51 @@ server.get('/api/v1/users', (req, res) => {
     .then(({data}) => data)
     .then(result => writeFile(`${__dirname}/users.json`, JSON.stringify(result) , { encoding: "utf8" }))))
   })
+
+server.post('/api/v1/users', async (req, res) => {
+    const polzovatel = req.body
+    const result = await readFile(`${__dirname}/users.json`, { encoding: "utf8" })
+    .then(text => {
+      const rasparsenniyText = JSON.parse(text)
+      const posledniIdPlusOdin =  rasparsenniyText[rasparsenniyText.length - 1].id + 1
+      const noviyPolzovatel = [...rasparsenniyText, {id: posledniIdPlusOdin, ...polzovatel}]
+      writeFile(`${__dirname}/users.json`, JSON.stringify(noviyPolzovatel), { encoding: "utf8" })
+      return { status: 'success', id: posledniIdPlusOdin }
+    })  
+    res.json(result)
+})
+
+server.patch('/api/v1/users/:userId', async (req, res) => {
+    const newObj = req.body
+    const result = await readFile(`${__dirname}/users.json`, { encoding: "utf8" })  
+    .then(text => {  
+      const textUpdated = JSON.parse(text)
+      const { userId } = req.params
+      const number = +userId
+      const updatedObj = { ...textUpdated[number], ...newObj }
+      writeFile(`${__dirname}/users.json`, JSON.stringify(updatedObj), { encoding: "utf8" })
+      return { status: 'success', id: userId } 
+    })
+    res.json(result)
+})
+
+server.delete('/api/v1/users/:userId', async (req, res) => {
+  const result = await readFile(`${__dirname}/users.json`, { encoding: "utf8" })  
+  .then(text => {  
+    const textUpdated = JSON.parse(text)
+    const { userId } = req.params
+    const number = +userId
+    const deletedElement = [...textUpdated.splice(number, 1)] 
+    writeFile(`${__dirname}/users.json`, JSON.stringify(deletedElement), { encoding: "utf8" })
+    return { status: 'success', id: userId }
+  })
+  res.json(result)
+})
+
+server.delete('/api/v1/users', (req, res) => {
+  const result = unlink(`${__dirname}/users.json`)
+  res.json(result)
+})
 
 const [htmlStart, htmlEnd] = Html({
   body: 'separator',
