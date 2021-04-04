@@ -51,14 +51,26 @@ server.get('/api/v1/users', (req, res) => {
   })
 
 server.post('/api/v1/users', async (req, res) => {
-    const polzovatel = req.body
+    const user = req.body
     const result = await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })
     .then(text => {
-      const rasparsenniyText = JSON.parse(text)
-      const posledniIdPlusOdin =  rasparsenniyText[rasparsenniyText.length - 1].id + 1
-      const noviyPolzovatel = [...rasparsenniyText, {id: posledniIdPlusOdin, ...polzovatel}]
-      writeFile(`${__dirname}/data/users.json`, JSON.stringify(noviyPolzovatel), { encoding: "utf8" })
-      return { status: 'success', id: posledniIdPlusOdin }
+      const parseText = JSON.parse(text)
+      const lastID =  parseText[parseText.length - 1].id + 1
+      const newUser = [...parseText, {id: lastID, ...user}]
+      writeFile(`${__dirname}/data/users.json`, JSON.stringify(newUser), { encoding: "utf8" })
+      return { status: 'success', id: lastID }
+    })
+    .catch(async () => {
+      const url = 'https://jsonplaceholder.typicode.com/users'
+      const status = await axios(url)
+      .then(({data: parseText}) => {
+      const lastID =  parseText[parseText.length - 1].id + 1
+      const newUser = [...parseText, {id: lastID, ...user}]
+      writeFile(`${__dirname}/data/users.json`, JSON.stringify(newUser), { encoding: "utf8" })
+      return { status: 'success', id: lastID }
+      })
+      .catch((err) => err)
+      return status
     })  
     res.json(result)
 })
@@ -70,10 +82,11 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
       const textUpdated = JSON.parse(text)
       const { userId } = req.params
       const number = +userId
-      const updatedObj = { ...textUpdated[number - 1], ...newObj }
+      const updatedObj = [...textUpdated, ...textUpdated[number], ...newObj]
       writeFile(`${__dirname}/data/users.json`, JSON.stringify(updatedObj), { encoding: "utf8" })
       return { status: 'success', id: userId } 
     })
+    .catch(err => err)
     res.json(result)
 })
 
@@ -88,6 +101,7 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
     writeFile(`${__dirname}/data/users.json`, JSON.stringify(qwe), { encoding: "utf8" })
     return { status: 'success', id: userId }
   })
+  .catch(err => err)
   res.json(result)
 })
 
