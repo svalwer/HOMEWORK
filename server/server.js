@@ -12,7 +12,7 @@ import config from './config'
 import Html from '../client/html'
 // import { id } from 'postcss-selector-parser'
 
-const { readFile, writeFile, stat, unlink } = require("fs").promises; 
+const { readFile, writeFile, unlink } = require("fs").promises; 
 require('colors')
 
 let Root
@@ -38,76 +38,68 @@ const middleware = [
 
 middleware.forEach((it) => server.use(it))
 
-server.get('/api/v1/users', (req, res) => {
-  stat(`${__dirname}/data/users.json`)  
-    .then(readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })  
-    .then(text => {  
-      res.json(JSON.parse(text))
-    })   
-    .catch(
-    axios('https://jsonplaceholder.typicode.com/users')
-    .then(({data}) => data)
-    .then(result => writeFile(`${__dirname}/data/users.json`, JSON.stringify(result) , { encoding: "utf8" }))))
-  })
+server.get('/api/v1/users', async (req, res) => {
+ const users = await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })  
+      .then(text => {  
+        return JSON.parse(text)  
+      })  
+      .catch(async () => {  
+         const resultErr = await axios('https://jsonplaceholder.typicode.com/users')
+         .then(({data}) => {
+          writeFile(`${__dirname}/data/users.json`, JSON.stringify(data), { encoding: "utf8" })
+          return data
+         })
+         .catch((err) => err)
+         return resultErr
+      })
+      res.json(users)
+})
 
 server.post('/api/v1/users', async (req, res) => {
-    const user = req.body
-    const result = await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })
-    .then(text => {
-      const parseText = JSON.parse(text)
-      const lastID =  parseText[parseText.length - 1].id + 1
-      const newUser = [...parseText, {id: lastID, ...user}]
-      writeFile(`${__dirname}/data/users.json`, JSON.stringify(newUser), { encoding: "utf8" })
-      return { status: 'success', id: lastID }
-    })
-    .catch(async () => {
-      const url = 'https://jsonplaceholder.typicode.com/users'
-      const status = await axios(url)
-      .then(({data: parseText}) => {
-      const lastID =  parseText[parseText.length - 1].id + 1
-      const newUser = [...parseText, {id: lastID, ...user}]
-      writeFile(`${__dirname}/data/users.json`, JSON.stringify(newUser), { encoding: "utf8" })
-      return { status: 'success', id: lastID }
-      })
-      .catch((err) => err)
-      return status
-    })  
-    res.json(result)
+  const user = req.body
+  const result = await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })  
+  .then(text => {  
+    const parseText = JSON.parse(text)
+    const LastId =  parseText[parseText.length - 1].id + 1
+    const newUser = [...parseText, {id: LastId, ...user}]
+    writeFile(`${__dirname}/data/users.json`, JSON.stringify(newUser), { encoding: "utf8" })
+    return { status: 'success', id: LastId }
+  })
+  res.json(result)
 })
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
-    const newObj = req.body
-    const result = await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })  
-    .then(text => {  
-      const textUpdated = JSON.parse(text)
-      const { userId } = req.params
-      const number = +userId
-      const updatedObj = [...textUpdated, ...textUpdated[number], ...newObj]
-      writeFile(`${__dirname}/data/users.json`, JSON.stringify(updatedObj), { encoding: "utf8" })
-      return { status: 'success', id: userId } 
+  const {userId} = req.params
+  const newUser = req.body
+  await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })
+  .then(text => {
+    const users = JSON.parse(text)
+    const updateUser = users.map(user => {
+      if (user.id === +userId) {
+        return { ...user, ...newUser}
+      }
+      return user
     })
-    .catch(err => err)
-    res.json(result)
+    writeFile(`${__dirname}/data/users.json`, JSON.stringify(updateUser), { encoding: "utf8" })
+  })
+  res.json({ status: 'success', id: userId })
 })
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
+  const {userId} = req.params
   const result = await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })  
   .then(text => {  
-    const textUpdated = JSON.parse(text)
-    const { userId } = req.params
+    const users = JSON.parse(text)
     const number = +userId
-    textUpdated.splice(number - 1, 1)
-    const qwe = [...textUpdated]
-    writeFile(`${__dirname}/data/users.json`, JSON.stringify(qwe), { encoding: "utf8" })
+    users.splice(number - 1, 1)
+    writeFile(`${__dirname}/data/users.json`, JSON.stringify(users), { encoding: "utf8" })
     return { status: 'success', id: userId }
   })
-  .catch(err => err)
   res.json(result)
 })
 
 server.delete('/api/v1/users', (req, res) => {
-  const result = unlink(`${__dirname}/data/users.json`)
-  res.json(result)
+  res.json(unlink(`${__dirname}/data/users.json`))
 })
 
 const [htmlStart, htmlEnd] = Html({
