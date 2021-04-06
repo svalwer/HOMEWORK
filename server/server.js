@@ -99,7 +99,8 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
 })
 
 server.delete('/api/v1/users', (req, res) => {
-  res.json(unlink(`${__dirname}/data/users.json`))
+  unlink(`${__dirname}/data/users.json`)
+  res.json({ status: 'success', id: userId })
 })
 
 const [htmlStart, htmlEnd] = Html({
