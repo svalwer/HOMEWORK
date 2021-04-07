@@ -38,6 +38,12 @@ const middleware = [
 
 middleware.forEach((it) => server.use(it))
 
+server.use((req, res, next) => {
+  res.set('x-skillcrucial-user', '0470b1fc-ec70-4eec-a94a-db9837adbaba');  
+   res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
+   next()
+})
+
 server.get('/api/v1/users', async (req, res) => {
  const users = await readFile(`${__dirname}/data/users.json`, { encoding: "utf8" })  
       .then(text => {  
