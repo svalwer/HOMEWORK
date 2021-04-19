@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React from 'react'
+import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import { Provider } from 'react-redux'
 import { ConnectedRouter } from 'connected-react-router'
@@ -7,8 +7,10 @@ import { Switch, Route, Redirect, StaticRouter } from 'react-router-dom'
 
 import store, { history } from '../redux'
 
-import Home from '../components/home'
-import DummyView from '../components/dummy-view'
+import Main from '../components/main'
+import RepoList from '../components/repo-list'
+import RepoRead from '../components/repo-read'
+
 import NotFound from '../components/404'
 
 import Startup from './startup'
@@ -67,14 +69,17 @@ const RouterSelector = (props) =>
   typeof window !== 'undefined' ? <ConnectedRouter {...props} /> : <StaticRouter {...props} />
 
 const RootComponent = (props) => {
+
+  const [value, setValue] = useState('')
+
   return (
     <Provider store={store}>
       <RouterSelector history={history} location={props.location} context={props.context}>
         <Startup>
           <Switch>
-            <Route exact path="/" component={() => <DummyView />} />
-            <Route exact path="/dashboard" component={() => <Home />} />
-            <PrivateRoute exact path="/hidden-route" component={() => <DummyView />} />
+            <Route exact path="/" component={() => <Main set={setValue}/>} />
+            <Route exact path="/main/:userName" component={() => <RepoList value={value}/>} />
+            <Route exact path="/main/:userName/:repositoryName" component={() => <RepoRead />} />
             <Route component={() => <NotFound />} />
           </Switch>
         </Startup>
