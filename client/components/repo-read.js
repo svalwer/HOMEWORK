@@ -15,6 +15,9 @@ const RepoRead = () => {
     .then(readMe => {
       return axios(readMe).then(readMeUrl => setRepoContent(readMeUrl.data))
     })
+    .catch(() => {
+      return []
+    })
   }, [userName, repositoryName])
 
   return (
