@@ -22,7 +22,7 @@ console.log(name)
           </div>
           <div className="text-yellow-600 mt-5 ">
             <button type="button" id="search-button" onClick={ () => {
-              history.push(`/main/${name}`)
+              history.push(`/${name}`)
               return props.set(name)
               } }>SEND</button>
           </div>

@@ -31,7 +31,7 @@ const RepoList = () => {
         <div className="bg-black text-yellow-600 font-bold rounded-lg p-10 mb-60">
           { repos.map(it => {
             return <div key={it}>          
-              <Link to={`/main/${userName}/${it}`}>{it}</Link>
+              <Link to={`/${userName}/${it}`}>{it}</Link>
             </div>})}
         </div>
       </div>

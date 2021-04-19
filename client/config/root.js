@@ -78,8 +78,8 @@ const RootComponent = (props) => {
         <Startup>
           <Switch>
             <Route exact path="/" component={() => <Main set={setValue}/>} />
-            <Route exact path="/main/:userName" component={() => <RepoList value={value}/>} />
-            <Route exact path="/main/:userName/:repositoryName" component={() => <RepoRead />} />
+            <Route exact path="/:userName" component={() => <RepoList value={value}/>} />
+            <Route exact path="/:userName/:repositoryName" component={() => <RepoRead />} />
             <Route component={() => <NotFound />} />
           </Switch>
         </Startup>
